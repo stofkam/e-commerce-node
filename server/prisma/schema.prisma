@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  address       Address?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  productReview ProductReview?
+  cart          Cart?
+  order         Order?
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  address   String
+  city      String
+  pincode   String
+  phone     String
+  notes     String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id            Int            @id @default(autoincrement())
+  image         String
+  title         String
+  description   String
+  category      String
+  brand         String
+  price         Int
+  salePrice     Int
+  totalStock    Int
+  averageReview Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  productReview ProductReview?
+  carts         Cart[]
+}
+
+model ProductReview {
+  id            Int      @id @default(autoincrement())
+  author        User     @relation(fields: [authorId], references: [id])
+  authorId      Int      @unique
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     Int      @unique
+  userName      String
+  reviewMessage String
+  reviewValue   Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int      @unique
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order?
+}
+
+model Feature {
+  id        Int      @id @default(autoincrement())
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  author          User      @relation(fields: [authorId], references: [id])
+  authorId        Int       @unique
+  cart            Cart      @relation(fields: [cartId], references: [id])
+  cartId          Int       @unique
+  cartItems       String[]
+  addressInfo     Json
+  orderStatus     String?
+  paymentMethod   String?
+  paymentStatus   String?
+  totalAmount     Int?
+  orderDate       DateTime?
+  orderUpdateDate DateTime?
+  paymentId       String?
+  payerId         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// https://github.com/sangammukherjee/mern-ecommerce-2024/blob/master/server/models/Cart.js
+// https://github.com/sangammukherjee/mern-ecommerce-2024/blob/master/client/src/components/admin-view/image-upload.jsx
+// https://www.youtube.com/watch?v=_4CPp670fK4&t=385s
